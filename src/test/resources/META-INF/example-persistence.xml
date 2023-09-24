@@ -1,0 +1,17 @@
+<?xml version="1.0" encoding="UTF-8" ?>
+<!--
+See https://docs.oracle.com/cd/E19798-01/821-1841/6nmq2cpbh/index.html
+and https://www.objectdb.com/java/jpa/entity/persistence-unit
+
+THIS FILE NEEDS TO BE DEFINED IN THE PROJECT THAT RUNS THE APPLICATION
+ -->
+<persistence xmlns="http://java.sun.com/xml/ns/persistence"
+ xmlns:xsi="http://www.w3.org/2001/XMLSchema-instance"
+ xsi:schemaLocation="http://java.sun.com/xml/ns/persistence
+ http://java.sun.com/xml/ns/persistence/persistence_1_0.xsd" version="1.0">
+
+	<persistence-unit name="default">
+	    <description>Example Persistence Unit</description>
+		<mapping-file>META-INF/example-entities.xml</mapping-file>
+	</persistence-unit>
+</persistence>
