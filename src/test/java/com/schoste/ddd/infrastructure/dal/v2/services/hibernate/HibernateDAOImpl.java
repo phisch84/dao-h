@@ -6,7 +6,6 @@ import org.springframework.context.ApplicationContext;
 
 import com.schoste.ddd.infrastructure.dal.v2.models.HibernateDO;
 import com.schoste.ddd.infrastructure.dal.v2.services.HibernateDAO;
-import com.schoste.ddd.infrastructure.dal.v2.services.hibernate.GenericHibernateDAO;
 
 /**
  * Example file system data object used in unit testing of the GenericSerializationDAO implementation

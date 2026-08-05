@@ -1,1 +1,1 @@
-com.schoste.ddd.infrastructure.dal.v2.services.HibernateListernerIntegrator
+com.schoste.ddd.infrastructure.dal.v2.services.hibernate.HibernateListernerIntegrator

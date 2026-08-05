@@ -8,7 +8,7 @@
     <!--
     Since all DOs are supposed to extend this class it needs to be defined as mapped-superclass
      -->
-	<mapped-superclass class="com.schoste.ddd.infrastructure.dal.v2.models.GenericDataObject">
+	<mapped-superclass class="com.schoste.ddd.infrastructure.dal.v2.models.GenericDataObject" access="FIELD">
 	    <attributes>
 	        <id name="id">
 	            <!-- no column definition required here because property and column name are the same -->
@@ -29,9 +29,6 @@
     <entity class="com.schoste.ddd.infrastructure.dal.v2.models.HibernateDO" name="HibernateDO">
     	<table name="hibernate_do"/>
         <attributes>
-            <id name="id">
-            	<generated-value strategy="IDENTITY"/>
-            </id>
             <basic name="exampleStringProperty">
             	<column name="example_string_property"/>
             </basic>

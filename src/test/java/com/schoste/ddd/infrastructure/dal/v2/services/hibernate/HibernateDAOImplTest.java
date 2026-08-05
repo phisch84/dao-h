@@ -16,6 +16,7 @@ import com.schoste.ddd.infrastructure.dal.v2.services.HibernateDAO;
  */
 @ContextConfiguration(locations = {
 		"file:src/test/resources/META-INF/module.xml",
+		"file:src/test/resources/META-INF/beans.xml",
 		"file:src/test/resources/db-setup.xml",
 		"file:src/test/resources/HibernateDAOImplTest.xml",
 		})

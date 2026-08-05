@@ -1,4 +1,4 @@
-package com.schoste.ddd.infrastructure.dal.v2.services;
+package com.schoste.ddd.infrastructure.dal.v2.services.hibernate;
 
 import org.hibernate.event.spi.PreInsertEvent;
 import org.hibernate.event.spi.PreInsertEventListener;
@@ -8,7 +8,8 @@ import org.hibernate.event.spi.PreUpdateEventListener;
 import com.schoste.ddd.infrastructure.dal.v2.models.GenericDataObject;
 
 /**
- * Listener class for data objects which is used by Hibernate
+ * Listener class for data objects which is used by Hibernate.
+ * Used to intercept updates from outside of the DAO - if any.
  * 
  * @author Philipp Schosteritsch <s.philipp@schoste.com>
  */

@@ -1,19 +1,21 @@
 package com.schoste.ddd.infrastructure.dal.v2.services.hibernate;
-
 import java.util.Arrays;
 import java.util.Collection;
 import java.util.List;
+import java.util.Objects;
 import java.util.stream.Collectors;
 
-import org.hibernate.Query;
 import org.hibernate.Session;
 import org.hibernate.SessionFactory;
 import org.hibernate.Transaction;
-import org.hibernate.criterion.Restrictions;
 
 import com.schoste.ddd.infrastructure.dal.v2.models.GenericDataObject;
 import com.schoste.ddd.infrastructure.dal.v2.services.GenericDAO;
-import com.schoste.ddd.infrastructure.dal.v2.services.GenericDataAccessObject;
+
+import jakarta.persistence.criteria.CriteriaBuilder;
+import jakarta.persistence.criteria.CriteriaQuery;
+import jakarta.persistence.criteria.Predicate;
+import jakarta.persistence.criteria.Root;
 
 /**
  * Version 1 implementation of the GenericDataAccessObject interface to persist data objects
@@ -23,7 +25,7 @@ import com.schoste.ddd.infrastructure.dal.v2.services.GenericDataAccessObject;
  *
  * @param <T> the class of the data object to persist
  */
-public abstract class GenericHibernateDAO <T extends GenericDataObject> extends GenericDAO<T> implements GenericDataAccessObject<T> 
+public abstract class GenericHibernateDAO <T extends GenericDataObject> extends GenericDAO<T>
 {
 	protected abstract SessionFactory getSessionFactory();
 
@@ -42,8 +44,7 @@ public abstract class GenericHibernateDAO <T extends GenericDataObject> extends 
 		
 		try
 		{
-			session.update(dataObject);
-			session.delete(dataObject);
+			session.remove(dataObject);
 			
 			transaction.commit();			
 		}
@@ -55,7 +56,6 @@ public abstract class GenericHibernateDAO <T extends GenericDataObject> extends 
 		}
 		finally
 		{
-			session.flush();
 			session.close();	
 		}
 	}
@@ -77,8 +77,7 @@ public abstract class GenericHibernateDAO <T extends GenericDataObject> extends 
 				
 				if (dataObject.getId() <= 0) continue;
 
-				session.update(dataObject);
-				session.delete(dataObject);
+				session.remove(dataObject);
 			}
 
 			transaction.commit();			
@@ -91,7 +90,6 @@ public abstract class GenericHibernateDAO <T extends GenericDataObject> extends 
 		}
 		finally
 		{
-			session.flush();
 			session.close();	
 		}
 	}
@@ -99,7 +97,6 @@ public abstract class GenericHibernateDAO <T extends GenericDataObject> extends 
 	/**
 	 * {@inheritDoc}
 	 */
-	@SuppressWarnings("unchecked")
 	@Override
 	protected void doDelete(int[] dataObjectIds) throws Exception
 	{
@@ -110,9 +107,10 @@ public abstract class GenericHibernateDAO <T extends GenericDataObject> extends 
 		{
 			for (int dataObjectId : dataObjectIds)
 			{
-				T dataObject = (T) session.load(this.getDataObjectClass(), dataObjectId);
-				session.update(dataObject);
-				session.delete(dataObject);
+				T dataObject = this.createDataObject();
+
+                session.load(dataObject, dataObjectId);
+				session.remove(dataObject);
 			}
 
 			transaction.commit();			
@@ -125,7 +123,6 @@ public abstract class GenericHibernateDAO <T extends GenericDataObject> extends 
 		}
 		finally
 		{
-			session.flush();
 			session.close();	
 		}
 	}
@@ -154,22 +151,25 @@ public abstract class GenericHibernateDAO <T extends GenericDataObject> extends 
 	protected synchronized Collection<T> doGet(int[] ids) throws Exception 
 	{
 		Session session = this.getSessionFactory().openSession();
-		Query query = null;
 		Collection<T> dataObjects = null;
+		CriteriaBuilder criteriaBuilder = session.getCriteriaBuilder();
+		CriteriaQuery<T> criteriaQuery = session.getCriteriaBuilder().createQuery(this.getDataObjectClass());
+		Root<T> root = criteriaQuery.from(this.getDataObjectClass());
+		Predicate greaterThanLastModified = criteriaBuilder.gt(root.get("modifiedTimeStamp"), this.latestModificationTimeStamp);
+		Predicate notDeleted = criteriaBuilder.isFalse(root.get("isDeleted"));
 
 		if (ids == null)
 		{
-			query = session
-				.createQuery(String.format("SELECT e FROM %s e WHERE (e.modifiedTimeStamp > :ts) AND (e.isDeleted = false)", this.getDataObjectClass().getSimpleName()))
-				.setParameter("ts", this.latestModificationTimeStamp);
-			
-			dataObjects = (Collection<T>) query.list();
+			criteriaQuery.select(root).where(criteriaBuilder.and(greaterThanLastModified, notDeleted));			
+			dataObjects = session.createQuery(criteriaQuery).list();
 		}
 		else
 		{
 			List<Integer> listOfIds = Arrays.stream(ids).boxed().collect(Collectors.toList());
+			Predicate inListOfIds = root.get("id").in(listOfIds);
 
-			dataObjects = session.createCriteria(this.getDataObjectClass()).add(Restrictions.in("id", listOfIds)).list();			
+            criteriaQuery.select(root).where(criteriaBuilder.and(greaterThanLastModified, notDeleted, inListOfIds));
+			dataObjects = session.createQuery(criteriaQuery).list();	
 		}
 
 		session.close();
@@ -193,6 +193,7 @@ public abstract class GenericHibernateDAO <T extends GenericDataObject> extends 
 	/**
 	 * {@inheritDoc}
 	 */
+	@SuppressWarnings("unchecked")
 	@Override
 	protected synchronized void doSave(T dataObject) throws Exception 
 	{
@@ -203,8 +204,23 @@ public abstract class GenericHibernateDAO <T extends GenericDataObject> extends 
 		
 		try
 		{
-			session.saveOrUpdate(dataObject);
-			transaction.commit();			
+			long unixTs = System.currentTimeMillis();
+
+            if (Objects.isNull(session.find(this.getDataObjectClass(), dataObject.getId())))
+            {
+		        dataObject.setCreatedTimeStamp(unixTs);
+				dataObject.setModifiedTimeStamp(unixTs);
+
+				session.persist(dataObject);
+            } 
+            else 
+            {
+				dataObject.setModifiedTimeStamp(unixTs);
+
+				session.merge(dataObject);
+            }
+
+            transaction.commit();			
 		}
 		catch (Exception e)
 		{
@@ -214,7 +230,6 @@ public abstract class GenericHibernateDAO <T extends GenericDataObject> extends 
 		}
 		finally
 		{
-			session.flush();
 			session.close();	
 		}
 	}
@@ -222,6 +237,7 @@ public abstract class GenericHibernateDAO <T extends GenericDataObject> extends 
 	/**
 	 * {@inheritDoc}
 	 */
+	@SuppressWarnings("unchecked")
 	@Override
 	protected synchronized void doSave(Collection<T> dataObjects) throws Exception
 	{
@@ -230,11 +246,24 @@ public abstract class GenericHibernateDAO <T extends GenericDataObject> extends 
 
 		try
 		{
+			long unixTs = System.currentTimeMillis();
+
 			for (T dataObject : dataObjects)
 			{
 				if (dataObject.getId() < 0) dataObject.setId(0);
 
-				session.saveOrUpdate(dataObject);
+                if (Objects.isNull(session.find(this.getDataObjectClass(), dataObject.getId())))
+                {
+					dataObject.setCreatedTimeStamp(unixTs);
+					dataObject.setModifiedTimeStamp(unixTs);
+
+					session.persist(dataObject);
+                } 
+                else 
+                {
+					dataObject.setModifiedTimeStamp(unixTs);
+	                dataObject = session.merge(dataObject);
+                }
 			}
 
 			transaction.commit();							
@@ -247,7 +276,6 @@ public abstract class GenericHibernateDAO <T extends GenericDataObject> extends 
 		}
 		finally
 		{
-			session.flush();
 			session.close();	
 		}
 	}
