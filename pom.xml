@@ -34,6 +34,7 @@
             <groupId>com.schoste.ddd.infrastructure</groupId>
             <artifactId>dao</artifactId>
             <version>${ddd.dao.version}</version>
+            <scope>compile</scope>
         </dependency>
 
         <!-- Spring (DI/AOP/IoC Framework) dependencies -->
@@ -53,20 +54,7 @@
             <groupId>org.springframework</groupId>
             <artifactId>spring-orm</artifactId>
             <version>${spring.version}</version>
-        </dependency>
-
-        <!-- Apache Commons DBCP -->
-        <dependency>
-            <groupId>commons-dbcp</groupId>
-            <artifactId>commons-dbcp</artifactId>
-            <version>${dbcp.version}</version>
-        </dependency>
-
-        <!-- PostgreSQL JDBC driver -->
-        <dependency>
-            <groupId>org.hsqldb</groupId>
-            <artifactId>hsqldb</artifactId>
-            <version>${hsql.version}</version>
+            <scope>compile</scope>
         </dependency>
 
         <!-- Hibernate -->
@@ -74,6 +62,24 @@
             <groupId>org.hibernate</groupId>
             <artifactId>hibernate-core</artifactId>
             <version>${hibernate.version}</version>
+            <scope>compile</scope>
+        </dependency>
+
+        <!-- Database drivers depend on the actual usage and therefore their scope is TEST -->
+        <!-- Apache Commons DBCP -->
+        <dependency>
+            <groupId>commons-dbcp</groupId>
+            <artifactId>commons-dbcp</artifactId>
+            <version>${dbcp.version}</version>
+            <scope>test</scope>
+        </dependency>
+
+        <!-- PostgreSQL JDBC driver -->
+        <dependency>
+            <groupId>org.hsqldb</groupId>
+            <artifactId>hsqldb</artifactId>
+            <version>${hsql.version}</version>
+            <scope>test</scope>
         </dependency>
 
         <!-- Testing -->
