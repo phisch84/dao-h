@@ -11,7 +11,7 @@ import org.hibernate.boot.registry.StandardServiceRegistryBuilder;
 
 /**
  * Static builder for the {@link SessionFactory}.
- * {@link SessionFactoryBuilder#setEntitiesXML(String)} and {@link SessionFactoryBuilder#buildSessionFactory(Map)} are supposed to be called
+ * {@link SessionFactoryBuilder#setMetadataSourcesResources(String)} and {@link SessionFactoryBuilder#buildSessionFactory(Map)} are supposed to be called
  * by Spring as configured in the module.xml.
  * In previous versions of Hibernate the session factory could be configured in Spring's XML. From Hibernate 5/6 on it must be done programmatically.
  * 
@@ -19,14 +19,14 @@ import org.hibernate.boot.registry.StandardServiceRegistryBuilder;
  */
 public class SessionFactoryBuilder
 {
-    private static String entitiesXML;
+    private static Collection<String> metaDataSourcesResources;
 
-    public static void setEntitiesXML(String entitiesXML)
+    public static void setMetadataSourcesResources(Collection<String> entitiesXML)
     {
-        SessionFactoryBuilder.entitiesXML = entitiesXML;
+        SessionFactoryBuilder.metaDataSourcesResources = entitiesXML;
     }
 
-    public static SessionFactory buildSessionFactory(Map<String, String> settings) 
+    public static SessionFactory buildSessionFactory(Map<String, Object> settings) 
     {
         StandardServiceRegistryBuilder builder = new StandardServiceRegistryBuilder();
 
@@ -36,7 +36,7 @@ public class SessionFactoryBuilder
 
             for (String key : keys)
             {
-                String value = settings.get(key);
+                Object value = settings.get(key);
 
                 builder.applySetting(key, value);
             }
@@ -45,7 +45,10 @@ public class SessionFactoryBuilder
         StandardServiceRegistry registry = builder.build();
         MetadataSources sources = new MetadataSources(registry);
 
-        sources.addResource(SessionFactoryBuilder.entitiesXML);  
+        for (String metaDataSourcesResource : SessionFactoryBuilder.metaDataSourcesResources)
+        {
+            sources.addResource(metaDataSourcesResource);  
+        }
 
         Metadata metadata = sources.buildMetadata();
 

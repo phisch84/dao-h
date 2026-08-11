@@ -24,8 +24,12 @@
     <!-- Hibernate 7 SessionFactory Bean definitions -->
     <bean id="sessionFactorySetup" class="org.springframework.beans.factory.config.MethodInvokingFactoryBean">
         <property name="targetClass" value="com.schoste.ddd.infrastructure.dal.v2.services.hibernate.SessionFactoryBuilder"/>
-        <property name="targetMethod" value="setEntitiesXML"/>
-        <property name="arguments" value="META-INF/example-entities.xml"/>
+        <property name="targetMethod" value="setMetadataSourcesResources"/>
+        <property name="arguments">
+            <list>
+                <value>META-INF/example-entities.xml</value>
+            </list>
+        </property>
     </bean>
 
     <bean id="sessionFactory" class="org.springframework.beans.factory.config.MethodInvokingFactoryBean">
