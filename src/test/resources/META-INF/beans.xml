@@ -9,4 +9,6 @@
     <!-- Unit Tests Bean Definition -->
     <bean id="HibernateDO" class="com.schoste.ddd.infrastructure.dal.v2.models.HibernateDO" scope="prototype" />
     <bean id="HibernateDAO" class="com.schoste.ddd.infrastructure.dal.v2.services.hibernate.HibernateDAOImpl" scope="singleton" />
+
+    <bean id="LazyLoader" class="com.schoste.ddd.infrastructure.dal.v2.services.LazyLoaderImpl" scope="prototype" />
 </beans>
