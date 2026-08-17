@@ -2,7 +2,7 @@
     <modelVersion>4.0.0</modelVersion>
     <groupId>com.schoste.ddd.infrastructure</groupId>
     <artifactId>dao-h</artifactId>
-    <version>3.0.0.RELEASE</version>
+    <version>3.1.0.RELEASE</version>
     <name>Generic Hibernate DAO</name>
     <url>https://www.schoste.com/</url>
 
@@ -18,7 +18,7 @@
         <hibernate.version>7.4.5.Final</hibernate.version>
         <dbcp.version>1.4</dbcp.version>
         <hsql.version>2.7.4</hsql.version>
-        <ddd.dao.version>3.0.0.RELEASE</ddd.dao.version>
+        <ddd.dao.version>3.1.0.RELEASE</ddd.dao.version>
         <ddd.test-utils.version>0.3.RELEASE</ddd.test-utils.version>
     </properties>
 
@@ -34,7 +34,6 @@
             <groupId>com.schoste.ddd.infrastructure</groupId>
             <artifactId>dao</artifactId>
             <version>${ddd.dao.version}</version>
-            <scope>compile</scope>
         </dependency>
 
         <!-- Spring (DI/AOP/IoC Framework) dependencies -->
